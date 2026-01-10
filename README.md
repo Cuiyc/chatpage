@@ -32,8 +32,9 @@ This is a Streamlit-based chatbot application that connects to an OpenAI-compati
    ```bash
    streamlit run app.py
    ```
-3. Select a model from the sidebar
-4. Start chatting!
+3. The application will be accessible at http://localhost:8501/chat
+4. Select a model from the sidebar
+5. Start chatting!
 
 ## Project Structure
 

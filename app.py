@@ -11,6 +11,8 @@ if "selected_model" not in st.session_state:
     st.session_state.selected_model = "qwen3-coder-30b-32k:latest"
 if "models" not in st.session_state:
     st.session_state.models = []
+if "show_thoughts" not in st.session_state:
+    st.session_state.show_thoughts = True
 
 # App title
 st.title("Chat with OpenAI Compatible Backend")
@@ -43,6 +45,9 @@ with st.sidebar:
     
     st.session_state.selected_model = selected_model
     
+    # Toggle for showing thoughts
+    st.session_state.show_thoughts = st.checkbox("Show Thinking Steps", value=True)
+    
     # Clear chat button
     if st.button("Clear Chat"):
         st.session_state.messages = []
@@ -50,7 +55,18 @@ with st.sidebar:
 # Display chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+        # If it's a thinking model response, we might want to display thoughts separately
+        if message["role"] == "assistant" and "thoughts" in message:
+            # Display the main response
+            st.markdown(message["content"])
+            # Display thoughts if enabled
+            if st.session_state.show_thoughts:
+                st.markdown("---")
+                st.markdown("**Thinking Steps:**")
+                for thought in message["thoughts"]:
+                    st.markdown(f"- {thought}")
+        else:
+            st.markdown(message["content"])
 
 # Handle user input
 if prompt := st.chat_input("What is your message?"):
@@ -80,13 +96,19 @@ if prompt := st.chat_input("What is your message?"):
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
             full_response = ""
+            # For demonstration purposes, we'll simulate thinking steps
+            # In a real implementation, this would be parsed from the model's actual response
+            thinking_steps = []
             for chunk in response:
                 if chunk.choices[0].delta.content is not None:
                     full_response += chunk.choices[0].delta.content
                     message_placeholder.markdown(full_response + "▌")
+            
             message_placeholder.markdown(full_response)
         
         # Add assistant response to chat history
+        # In a real implementation, we would parse the model's response to extract thinking steps
+        # For now, we'll just add the full response
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         
     except Exception as e:
