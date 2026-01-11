@@ -103,7 +103,7 @@ if prompt := st.chat_input("What is your message?"):
 
         # Process and display messages
         assistant_messages = []
-        search_results = []
+        thinking_steps = []
 
         for msg in messages:
             if isinstance(msg, AIMessage):
@@ -111,28 +111,33 @@ if prompt := st.chat_input("What is your message?"):
                     assistant_messages.append(msg.content)
                 if hasattr(msg, "tool_calls") and msg.tool_calls:
                     for tool_call in msg.tool_calls:
-                        search_results.append(
-                            f"🔍 **Search:** {tool_call['args'].get('query', 'N/A')}"
+                        thinking_steps.append(
+                            f"🔍 **Planning to search:** {tool_call['args'].get('query', 'N/A')}"
                         )
             elif isinstance(msg, ToolMessage):
-                search_results.append(f"📄 **Results:** {msg.content[:200]}...")
+                thinking_steps.append(
+                    f"📄 **Search completed:** Retrieved {len(msg.content)} characters of results"
+                )
 
         # Display assistant response
         with st.chat_message("assistant"):
-            if search_results:
+            if thinking_steps and st.session_state.show_thoughts:
                 st.markdown("---")
-                for result in search_results:
-                    st.markdown(result)
+                st.markdown("**🤔 Thinking Steps:**")
+                for step in thinking_steps:
+                    st.markdown(f"- {step}")
                 st.markdown("---")
 
             full_response = " ".join(assistant_messages)
             message_placeholder = st.empty()
             message_placeholder.markdown(full_response)
 
-        # Add assistant response to chat history
-        st.session_state.messages.append(
-            {"role": "assistant", "content": full_response}
-        )
+        # Add assistant response to chat history with thinking steps
+        message_data = {"role": "assistant", "content": full_response}
+        if thinking_steps:
+            message_data["thoughts"] = thinking_steps
+
+        st.session_state.messages.append(message_data)
 
     except Exception as e:
         st.error(f"Error getting response: {str(e)}")
