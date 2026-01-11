@@ -68,6 +68,7 @@ Search results are formatted and displayed separately from the main response.
 - `run_app.sh` - Shell script to run the application
 - `chatbot.service` - Systemd service configuration
 - `install_service.sh` - Script to install the systemd service
+- `debug_service.sh` - Script to debug systemd service issues
 
 ## Configuration
 
@@ -133,7 +134,57 @@ sudo systemctl status chatbot
 
 # View service logs
 sudo journalctl -u chatbot -f
+
+# Run debug script
+./debug_service.sh
 ```
+
+### Service Debugging
+
+For troubleshooting systemd service issues:
+
+#### Quick Debug
+```bash
+# Run the comprehensive debug script
+./debug_service.sh
+```
+
+#### Common Debugging Commands
+```bash
+# Check service status with detailed output
+sudo systemctl status chatbot -l
+
+# View recent logs (last 50 lines)
+sudo journalctl -u chatbot -n 50
+
+# Follow logs in real-time
+sudo journalctl -u chatbot -f
+
+# Check for syntax errors in service file
+sudo systemd-analyze verify /etc/systemd/system/chatbot.service
+
+# Test manual execution as service user
+sudo -u cuiyc bash -c 'cd /Users/cuiyc/workspace/chatpage && ./run_app.sh'
+```
+
+#### Troubleshooting Common Issues
+
+1. **Service fails to start:**
+   - Check file permissions: `ls -la run_app.sh`
+   - Verify Python environment: `sudo -u cuiyc python -c "import streamlit, langchain"`
+   - Check Ollama backend: `curl http://spark:11434/v1/models`
+
+2. **Port already in use:**
+   - Find process using port 8501: `sudo lsof -i :8501`
+   - Kill conflicting process or change port in run_app.sh
+
+3. **Import errors:**
+   - Verify dependencies: `sudo -u cuiyc pip list | grep langchain`
+   - Check Python path: `sudo -u cuiyc which python`
+
+4. **Permission denied:**
+   - Fix script permissions: `chmod +x run_app.sh`
+   - Ensure user has access to working directory
 
 ### Service Configuration
 
