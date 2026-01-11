@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import json
+import asyncio
 from openai import OpenAI
 from typing import List, Dict, Any
 from langchain_core.messages import AIMessage, ToolMessage
@@ -98,7 +99,7 @@ if prompt := st.chat_input("What is your message?"):
         )
 
         # Run the agent
-        messages = st.run_sync(run_agent(graph, prompt, st.session_state.messages[:-1]))
+        messages = asyncio.run(run_agent(graph, prompt, st.session_state.messages[:-1]))
 
         # Process and display messages
         assistant_messages = []
