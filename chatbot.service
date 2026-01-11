@@ -5,16 +5,16 @@ Wants=network.target
 
 [Service]
 Type=simple
-User=cuiyc
-Group=cuiyc
-WorkingDirectory=/Users/cuiyc/workspace/chatpage
-ExecStart=/Users/cuiyc/workspace/chatpage/run_app.sh
+User={{USER}}
+Group={{USER}}
+WorkingDirectory={{WORKING_DIR}}
+ExecStart={{WORKING_DIR}}/run_app.sh
 Restart=always
 RestartSec=5
 StandardOutput=journal
 StandardError=journal
 Environment=PATH=/opt/anaconda3/bin:/usr/local/bin:/usr/bin:/bin
-Environment=PYTHONPATH=/Users/cuiyc/workspace/chatpage
+Environment=PYTHONPATH={{WORKING_DIR}}
 
 # Security settings
 NoNewPrivileges=yes

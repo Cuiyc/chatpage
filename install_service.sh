@@ -7,8 +7,8 @@ set -e
 
 SERVICE_NAME="chatbot"
 SERVICE_FILE="chatbot.service"
-WORKING_DIR="/Users/cuiyc/workspace/chatpage"
-USER="cuiyc"
+WORKING_DIR="$(pwd)"
+USER="$(whoami)"
 
 echo "🚀 Installing YC Spark Chatbot as systemd service..."
 
@@ -31,9 +31,11 @@ if [ ! -d "$WORKING_DIR" ]; then
     exit 1
 fi
 
-# Copy service file to systemd directory
-echo "📋 Copying service file to /etc/systemd/system/..."
-cp "$SERVICE_FILE" "/etc/systemd/system/$SERVICE_NAME.service"
+# Substitute variables in service file and copy to systemd directory
+echo "📋 Configuring and copying service file to /etc/systemd/system/..."
+sed -e "s|{{USER}}|$USER|g" \
+    -e "s|{{WORKING_DIR}}|$WORKING_DIR|g" \
+    "$SERVICE_FILE" > "/etc/systemd/system/$SERVICE_NAME.service"
 
 # Reload systemd daemon
 echo "🔄 Reloading systemd daemon..."
