@@ -1,0 +1,103 @@
+from typing import Annotated, Literal, TypedDict
+from langchain_community.tools import DuckDuckGoSearchRun
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langchain_core.tools import tool
+from langgraph.graph import END, StateGraph, START
+from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode
+import requests
+
+
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
+
+
+def create_search_tool():
+    search_tool = DuckDuckGoSearchRun()
+
+    @tool
+    def web_search(query: str) -> str:
+        """Search the web for information using DuckDuckGo.
+
+        Args:
+            query: The search query string
+
+        Returns:
+            Search results as a formatted string
+        """
+        return search_tool.run(query)
+
+    return web_search
+
+
+def should_continue(state: State) -> Literal["tools", END]:
+    messages = state["messages"]
+    last_message = messages[-1]
+
+    if last_message.tool_calls:
+        return "tools"
+    return END
+
+
+def create_graph(
+    model_name: str = "qwen3-coder-30b-32k:latest",
+    base_url: str = "http://spark:11434/v1",
+):
+    from langchain_openai import ChatOpenAI
+
+    search_tool = create_search_tool()
+    tools = [search_tool]
+
+    tool_node = ToolNode(tools)
+
+    llm = ChatOpenAI(
+        model=model_name,
+        base_url=base_url,
+        api_key="ollama",
+        temperature=0.7,
+    )
+
+    llm_with_tools = llm.bind_tools(tools)
+
+    def model_node(state: State):
+        response = llm_with_tools.invoke(state["messages"])
+        return {"messages": [response]}
+
+    workflow = StateGraph(State)
+
+    workflow.add_node("agent", model_node)
+    workflow.add_node("tools", tool_node)
+
+    workflow.add_edge(START, "agent")
+    workflow.add_conditional_edges(
+        "agent",
+        should_continue,
+        {
+            "tools": "tools",
+            END: END,
+        },
+    )
+    workflow.add_edge("tools", "agent")
+
+    return workflow.compile()
+
+
+async def run_agent(graph, user_message: str, chat_history: list = None):
+    if chat_history is None:
+        chat_history = []
+
+    messages = []
+
+    for msg in chat_history:
+        if msg["role"] == "user":
+            messages.append(HumanMessage(content=msg["content"]))
+        elif msg["role"] == "assistant":
+            messages.append(AIMessage(content=msg["content"]))
+
+    messages.append(HumanMessage(content=user_message))
+
+    config = {"configurable": {"thread_id": "chat_session"}}
+
+    result = await graph.ainvoke({"messages": messages}, config)
+
+    return result["messages"]
