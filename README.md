@@ -16,6 +16,7 @@ This is a Streamlit-based chatbot application that connects to an OpenAI-compati
 ## Requirements
 
 - Python 3.7+
+- Virtual Environment (venv) in project directory
 - Streamlit
 - Requests
 - OpenAI Python library
@@ -28,7 +29,12 @@ This is a Streamlit-based chatbot application that connects to an OpenAI-compati
 ## Installation
 
 1. Clone or download this repository
-2. Install dependencies:
+2. Create and activate virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
@@ -170,8 +176,9 @@ sudo -u cuiyc bash -c 'cd /Users/cuiyc/workspace/chatpage && ./run_app.sh'
 #### Troubleshooting Common Issues
 
 1. **Service fails to start:**
+   - Check virtual environment: `ls -la venv/bin/python`
    - Check file permissions: `ls -la run_app.sh`
-   - Verify Python environment: `sudo -u cuiyc python -c "import streamlit, langchain"`
+   - Verify Python environment: `sudo -u cuiyc ./venv/bin/python -c "import streamlit, langchain"`
    - Check Ollama backend: `curl http://spark:11434/v1/models`
 
 2. **Port already in use:**
@@ -179,12 +186,14 @@ sudo -u cuiyc bash -c 'cd /Users/cuiyc/workspace/chatpage && ./run_app.sh'
    - Kill conflicting process or change port in run_app.sh
 
 3. **Import errors:**
-   - Verify dependencies: `sudo -u cuiyc pip list | grep langchain`
+   - Verify virtual environment dependencies: `sudo -u cuiyc ./venv/bin/pip list | grep langchain`
    - Check Python path: `sudo -u cuiyc which python`
+   - Test venv activation: `sudo -u cuiyc bash -c 'source venv/bin/activate && which python'`
 
 4. **Permission denied:**
    - Fix script permissions: `chmod +x run_app.sh`
-   - Ensure user has access to working directory
+   - Ensure user has access to working directory and venv
+   - Check venv permissions: `ls -la venv/bin/python`
 
 ### Service Configuration
 
@@ -193,7 +202,8 @@ The service is configured to:
 - Auto-restart on failure
 - Start after network is available
 - Log to systemd journal
-- Use the conda environment for Python dependencies
+- Use the virtual environment Python (`./venv/bin/python`)
+- Set proper PATH to include virtual environment
 
 ## Notes
 

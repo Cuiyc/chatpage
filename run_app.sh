@@ -7,4 +7,4 @@ echo ""
 echo "Press Ctrl+C to stop the application"
 echo ""
 
-streamlit run app.py
+./venv/bin/python -m streamlit run app.py

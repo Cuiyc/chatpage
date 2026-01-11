@@ -15,8 +15,16 @@ sudo journalctl -u chatbot -n 10 --no-pager 2>/dev/null || echo "❌ No logs ava
 echo -e "\n=== Environment Check ==="
 sudo -u cuiyc bash -c 'echo "User: $(whoami)"; echo "Dir: $(pwd)"; echo "Python: $(python --version 2>&1)"; echo "Streamlit: $(which streamlit || echo Not found)"' 2>/dev/null || echo "❌ Cannot check environment as cuiyc user"
 
+echo -e "\n=== Virtual Environment Check ==="
+if [ -f "/Users/cuiyc/workspace/chatpage/venv/bin/python" ]; then
+    echo "✅ Virtual environment found"
+    sudo -u cuiyc bash -c 'echo "Venv Python: $(/Users/cuiyc/workspace/chatpage/venv/bin/python --version 2>&1)"' 2>/dev/null
+else
+    echo "❌ Virtual environment not found at /Users/cuiyc/workspace/chatpage/venv/"
+fi
+
 echo -e "\n=== Dependency Check ==="
-sudo -u cuiyc bash -c 'cd /Users/cuiyc/workspace/chatpage 2>/dev/null && python -c "
+sudo -u cuiyc bash -c 'cd /Users/cuiyc/workspace/chatpage 2>/dev/null && ./venv/bin/python -c "
 try:
     import streamlit, langchain, langgraph, duckduckgo_search
     print(\"✅ All Python dependencies OK\")
