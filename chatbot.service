@@ -1,0 +1,24 @@
+[Unit]
+Description=YC Spark Chatbot Demo with LangGraph Agent
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=cuiyc
+Group=cuiyc
+WorkingDirectory=/Users/cuiyc/workspace/chatpage
+ExecStart=/Users/cuiyc/workspace/chatpage/run_app.sh
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=PATH=/opt/anaconda3/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONPATH=/Users/cuiyc/workspace/chatpage
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -65,6 +65,9 @@ Search results are formatted and displayed separately from the main response.
 - `tools.py` - DuckDuckGo search tool implementation
 - `requirements.txt` - Python dependencies
 - `IMPLEMENTATION_PLAN.md` - Implementation plan for search feature
+- `run_app.sh` - Shell script to run the application
+- `chatbot.service` - Systemd service configuration
+- `install_service.sh` - Script to install the systemd service
 
 ## Configuration
 
@@ -85,6 +88,61 @@ The agent workflow:
 - Conditional routing between model and tool nodes
 - Automatic tool invocation based on LLM decision
 - State management through LangGraph's state system
+
+## Systemd Service Installation
+
+For production deployment, you can install the chatbot as a systemd service:
+
+### Automatic Installation
+
+```bash
+sudo ./install_service.sh
+```
+
+### Manual Installation
+
+1. Copy the service file to systemd:
+   ```bash
+   sudo cp chatbot.service /etc/systemd/system/chatbot.service
+   ```
+
+2. Reload systemd daemon:
+   ```bash
+   sudo systemctl daemon-reload
+   ```
+
+3. Enable the service:
+   ```bash
+   sudo systemctl enable chatbot
+   ```
+
+### Service Management
+
+```bash
+# Start the service
+sudo systemctl start chatbot
+
+# Stop the service
+sudo systemctl stop chatbot
+
+# Restart the service
+sudo systemctl restart chatbot
+
+# Check service status
+sudo systemctl status chatbot
+
+# View service logs
+sudo journalctl -u chatbot -f
+```
+
+### Service Configuration
+
+The service is configured to:
+- Run as user `cuiyc`
+- Auto-restart on failure
+- Start after network is available
+- Log to systemd journal
+- Use the conda environment for Python dependencies
 
 ## Notes
 
